@@ -16,5 +16,21 @@ namespace ToDoList
         {
             InitializeComponent();
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+        public class Task
+        {
+            public string Description { get; set; }
+            public bool IsDone { get; set; }
+
+        }
     }
 }
