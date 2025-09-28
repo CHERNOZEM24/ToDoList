@@ -67,6 +67,7 @@
             this.button2.TabIndex = 4;
             this.button2.Text = "Сорт. Приоритет";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.SortByPriority_Click);
             // 
             // button4
             // 
@@ -76,6 +77,7 @@
             this.button4.TabIndex = 6;
             this.button4.Text = "Сорт. Выполнение";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.SortByIsDone_Click);
             // 
             // button5
             // 
@@ -85,6 +87,7 @@
             this.button5.TabIndex = 7;
             this.button5.Text = "Сорт. Срок";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.SortByDate_Click);
             // 
             // button6
             // 
@@ -94,6 +97,7 @@
             this.button6.TabIndex = 8;
             this.button6.Text = "Сорт. Категория";
             this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.SortByCategory_Click);
             // 
             // button7
             // 
@@ -103,6 +107,7 @@
             this.button7.TabIndex = 9;
             this.button7.Text = "Сорт. Алфавит";
             this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.SortByName_Click);
             // 
             // Form1
             // 

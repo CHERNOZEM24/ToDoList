@@ -154,6 +154,28 @@ namespace ToDoList
             dataGridView1.Rows[rowIndex].Tag = newTask; 
         }
 
-  
+        private void SortByPriority_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["Priority"], System.ComponentModel.ListSortDirection.Ascending);
+        }
+
+        private void SortByCategory_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["Category"], System.ComponentModel.ListSortDirection.Ascending);
+        }
+
+        private void SortByDate_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["DueDate"], System.ComponentModel.ListSortDirection.Ascending);
+        }
+        private void SortByName_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["Description"], System.ComponentModel.ListSortDirection.Ascending);
+        }
+
+        private void SortByIsDone_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["Done"], System.ComponentModel.ListSortDirection.Ascending);
+        }
     }
 }
