@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Text.Json;
 
 namespace ToDoList
 {
@@ -18,8 +20,60 @@ namespace ToDoList
         {
             InitializeComponent();
             SetupDataGridView();
-            dataGridView1.CellClick += DataGridView1_CellClick; 
+            dataGridView1.CellClick += DataGridView1_CellClick;
+            LoadFromJson();
         }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            SaveToJson();
+            base.OnFormClosing(e);
+        }
+
+        private void SaveToJson()
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                Task task = row.Tag as Task;
+                if (task != null)
+                {
+                    task.Priority = row.Cells["Priority"].Value?.ToString();
+                    task.Description = row.Cells["Description"].Value?.ToString();
+                    task.Category = row.Cells["Category"].Value?.ToString();
+                    task.IsDone = (bool)(row.Cells["Done"].Value ?? false);
+
+                    if (DateTime.TryParse(row.Cells["DueDate"].Value?.ToString(), out DateTime date))
+                        task.Date = date;
+                }
+            }
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(tasks, options);
+            File.WriteAllText("tasks.json", json);
+        }
+
+        private void LoadFromJson()
+        {
+                if (File.Exists("tasks.json"))
+                {
+                    string json = File.ReadAllText("tasks.json");
+                    tasks = JsonSerializer.Deserialize<List<Task>>(json);
+
+                    dataGridView1.Rows.Clear();
+                    foreach (var task in tasks)
+                    {
+                        int rowIndex = dataGridView1.Rows.Add();
+                        dataGridView1.Rows[rowIndex].Tag = task;
+                        dataGridView1.Rows[rowIndex].Cells["Priority"].Value = task.Priority;
+                        dataGridView1.Rows[rowIndex].Cells["Description"].Value = task.Description;
+                        dataGridView1.Rows[rowIndex].Cells["Category"].Value = task.Category;
+                        dataGridView1.Rows[rowIndex].Cells["DueDate"].Value = task.Date?.ToShortDateString();
+                        dataGridView1.Rows[rowIndex].Cells["Done"].Value = task.IsDone;
+                    }
+                }
+            }
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -99,5 +153,7 @@ namespace ToDoList
             int rowIndex = dataGridView1.Rows.Add();
             dataGridView1.Rows[rowIndex].Tag = newTask; 
         }
+
+  
     }
 }
