@@ -7,14 +7,175 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Text.Json;
 
 namespace ToDoList
 {
     public partial class Form1 : Form
     {
+        private List<Task> tasks = new List<Task>(); 
+
         public Form1()
         {
             InitializeComponent();
+            SetupDataGridView();
+            dataGridView1.CellClick += DataGridView1_CellClick;
+            LoadFromJson();
+        }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            SaveToJson();
+            base.OnFormClosing(e);
+        }
+
+        private void SaveToJson()
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                Task task = row.Tag as Task;
+                if (task != null)
+                {
+                    task.Priority = row.Cells["Priority"].Value?.ToString();
+                    task.Description = row.Cells["Description"].Value?.ToString();
+                    task.Category = row.Cells["Category"].Value?.ToString();
+                    task.IsDone = (bool)(row.Cells["Done"].Value ?? false);
+
+                    if (DateTime.TryParse(row.Cells["DueDate"].Value?.ToString(), out DateTime date))
+                        task.Date = date;
+                }
+            }
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(tasks, options);
+            File.WriteAllText("tasks.json", json);
+        }
+
+        private void LoadFromJson()
+        {
+                if (File.Exists("tasks.json"))
+                {
+                    string json = File.ReadAllText("tasks.json");
+                    tasks = JsonSerializer.Deserialize<List<Task>>(json);
+
+                    dataGridView1.Rows.Clear();
+                    foreach (var task in tasks)
+                    {
+                        int rowIndex = dataGridView1.Rows.Add();
+                        dataGridView1.Rows[rowIndex].Tag = task;
+                        dataGridView1.Rows[rowIndex].Cells["Priority"].Value = task.Priority;
+                        dataGridView1.Rows[rowIndex].Cells["Description"].Value = task.Description;
+                        dataGridView1.Rows[rowIndex].Cells["Category"].Value = task.Category;
+                        dataGridView1.Rows[rowIndex].Cells["DueDate"].Value = task.Date?.ToShortDateString();
+                        dataGridView1.Rows[rowIndex].Cells["Done"].Value = task.IsDone;
+                    }
+                }
+            }
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+        }
+
+        private void SetupDataGridView()
+        {
+            dataGridView1.Columns.Clear();
+            dataGridView1.RowHeadersVisible = false;
+
+            //Priority
+            DataGridViewComboBoxColumn priorityCol = new DataGridViewComboBoxColumn();
+            priorityCol.HeaderText = "Приоритет";
+            priorityCol.Name = "Priority";
+            priorityCol.Items.AddRange("Высокий", "Средний", "Низкий");
+            dataGridView1.Columns.Add(priorityCol);
+
+            //Name
+            DataGridViewTextBoxColumn descCol = new DataGridViewTextBoxColumn();
+            descCol.HeaderText = "Задача";
+            descCol.Name = "Description";
+            dataGridView1.Columns.Add(descCol);
+
+            //Category
+            DataGridViewComboBoxColumn categoryCol = new DataGridViewComboBoxColumn();
+            categoryCol.HeaderText = "Категория";
+            categoryCol.Name = "Category";
+            categoryCol.Items.AddRange("Дом", "Учеба", "Спорт");
+            dataGridView1.Columns.Add(categoryCol);
+
+            //Date
+            DataGridViewTextBoxColumn dateCol = new DataGridViewTextBoxColumn();
+            dateCol.HeaderText = "Срок";
+            dateCol.Name = "DueDate";
+            dataGridView1.Columns.Add(dateCol);
+
+            //IsDone
+            DataGridViewCheckBoxColumn doneCol = new DataGridViewCheckBoxColumn();
+            doneCol.HeaderText = "✓";
+            doneCol.Name = "Done";
+            dataGridView1.Columns.Add(doneCol);
+
+            //Delete
+            DataGridViewButtonColumn deleteCol = new DataGridViewButtonColumn();
+            deleteCol.HeaderText = "Удалить";
+            deleteCol.Name = "Delete";
+            deleteCol.Text = "Тык";
+            deleteCol.UseColumnTextForButtonValue = true;
+            dataGridView1.Columns.Add(deleteCol);
+        }
+
+        public class Task
+        {
+            public string Description { get; set; }
+            public bool IsDone { get; set; }
+            public string Category { get; set; }
+            public string Priority { get; set; }
+            public DateTime? Date { get; set; }
+        }
+
+        private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dataGridView1.Columns[e.ColumnIndex].Name == "Delete")
+            {
+                Task task = dataGridView1.Rows[e.RowIndex].Tag as Task;
+                if (task != null) tasks.Remove(task);
+
+                dataGridView1.Rows.RemoveAt(e.RowIndex);
+            }
+        }
+
+        private void Add_Click(object sender, EventArgs e)
+        {
+            Task newTask = new Task();
+            tasks.Add(newTask);
+
+            int rowIndex = dataGridView1.Rows.Add();
+            dataGridView1.Rows[rowIndex].Tag = newTask; 
+        }
+
+        private void SortByPriority_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["Priority"], System.ComponentModel.ListSortDirection.Ascending);
+        }
+
+        private void SortByCategory_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["Category"], System.ComponentModel.ListSortDirection.Ascending);
+        }
+
+        private void SortByDate_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["DueDate"], System.ComponentModel.ListSortDirection.Ascending);
+        }
+        private void SortByName_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["Description"], System.ComponentModel.ListSortDirection.Ascending);
+        }
+
+        private void SortByIsDone_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Sort(dataGridView1.Columns["Done"], System.ComponentModel.ListSortDirection.Ascending);
         }
     }
 }
